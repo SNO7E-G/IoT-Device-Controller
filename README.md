@@ -40,7 +40,6 @@ The system consists of several components:
 - **Database**: Stores device information, user data, and sensor readings
 - **Device Simulator**: For testing the system without physical devices
 
-![Architecture Diagram](https://via.placeholder.com/800x400?text=IoT+Device+Controller+Architecture)
 
 ## 🚀 Installation
 
