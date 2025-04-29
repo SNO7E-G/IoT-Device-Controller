@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Control Device - IoT Device Controller{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('device.index') }}">Devices</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('device.view', device_id=device.id) }}">{{ device.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Control</li>
+        </ol>
+    </nav>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-sliders"></i> Control Device: {{ device.name }}</h2>
+        <span class="badge {% if device.status == 'online' %}bg-success{% elif device.status == 'offline' %}bg-secondary{% else %}bg-warning{% endif %} device-status-badge">
+            {{ device.status }}
+        </span>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Device Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Device ID:</strong> {{ device.device_id }}</p>
+                    <p><strong>Type:</strong> {{ device.device_type }}</p>
+                    <p><strong>Status:</strong> <span class="device-status-text 
+                        {% if device.status == 'online' %}text-success{% elif device.status == 'offline' %}text-secondary{% else %}text-warning{% endif %}">
+                        {{ device.status }}
+                    </span></p>
+                    <p><strong>Location:</strong> {{ device.location or 'Not set' }}</p>
+                    <p><strong>Last seen:</strong> <span class="device-last-seen">
+                        {{ device.last_seen.strftime('%Y-%m-%d %H:%M:%S') if device.last_seen else 'Never' }}
+                    </span></p>
+                    <p><strong>Firmware:</strong> {{ device.firmware_version or 'Unknown' }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Device Control</h5>
+                </div>
+                <div class="card-body">
+                    {% if device.status == 'offline' %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This device is currently offline. Commands may not be executed until the device comes back online.
+                    </div>
+                    {% endif %}
+                    
+                    <form class="device-control-form" data-device-id="{{ device.device_id }}">
+                        <div class="mb-3">
+                            <label for="command" class="form-label">Command</label>
+                            <select class="form-select" id="command" name="command" required>
+                                <option value="">Select a command</option>
+                                <option value="power">Power On/Off</option>
+                                <option value="restart">Restart</option>
+                                <option value="status">Get Status</option>
+                                <option value="set_brightness">Set Brightness</option>
+                                <option value="set_temperature">Set Temperature</option>
+                                <option value="set_color">Set Color</option>
+                                <option value="set_mode">Set Mode</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Power command parameters -->
+                        <div class="command-params power-params d-none">
+                            <div class="mb-3">
+                                <label for="param_state" class="form-label">Power State</label>
+                                <select class="form-select" id="param_state" name="param_state">
+                                    <option value="on">On</option>
+                                    <option value="off">Off</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Brightness command parameters -->
+                        <div class="command-params brightness-params d-none">
+                            <div class="mb-3">
+                                <label for="param_brightness" class="form-label">Brightness (0-100%)</label>
+                                <input type="range" class="form-range" id="param_brightness" name="param_brightness" min="0" max="100" value="50">
+                                <div class="d-flex justify-content-between">
+                                    <span>0%</span>
+                                    <span id="brightness-value">50%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Temperature command parameters -->
+                        <div class="command-params temperature-params d-none">
+                            <div class="mb-3">
+                                <label for="param_temperature" class="form-label">Temperature (°C)</label>
+                                <input type="number" class="form-control" id="param_temperature" name="param_temperature" min="16" max="30" value="22">
+                            </div>
+                        </div>
+                        
+                        <!-- Color command parameters -->
+                        <div class="command-params color-params d-none">
+                            <div class="mb-3">
+                                <label for="param_color" class="form-label">Color</label>
+                                <input type="color" class="form-control form-control-color" id="param_color" name="param_color" value="#0d6efd">
+                            </div>
+                        </div>
+                        
+                        <!-- Mode command parameters -->
+                        <div class="command-params mode-params d-none">
+                            <div class="mb-3">
+                                <label for="param_mode" class="form-label">Mode</label>
+                                <select class="form-select" id="param_mode" name="param_mode">
+                                    <option value="auto">Auto</option>
+                                    <option value="manual">Manual</option>
+                                    <option value="eco">Eco</option>
+                                    <option value="boost">Boost</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send"></i> Send Command
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Command History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="command-history">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Command</th>
+                                    <th>Parameters</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="text-center">No command history available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const commandSelect = document.getElementById('command');
+        const brightnessPicker = document.getElementById('param_brightness');
+        const brightnessValue = document.getElementById('brightness-value');
+        
+        // Show/hide command parameters based on selected command
+        commandSelect.addEventListener('change', function() {
+            // Hide all parameter sections first
+            document.querySelectorAll('.command-params').forEach(el => {
+                el.classList.add('d-none');
+            });
+            
+            // Show the relevant parameter section
+            const selectedCommand = this.value;
+            if (selectedCommand === 'power') {
+                document.querySelector('.power-params').classList.remove('d-none');
+            } else if (selectedCommand === 'set_brightness') {
+                document.querySelector('.brightness-params').classList.remove('d-none');
+            } else if (selectedCommand === 'set_temperature') {
+                document.querySelector('.temperature-params').classList.remove('d-none');
+            } else if (selectedCommand === 'set_color') {
+                document.querySelector('.color-params').classList.remove('d-none');
+            } else if (selectedCommand === 'set_mode') {
+                document.querySelector('.mode-params').classList.remove('d-none');
+            }
+        });
+        
+        // Update brightness value display
+        brightnessPicker.addEventListener('input', function() {
+            brightnessValue.textContent = this.value + '%';
+        });
+        
+        // Handle command submission
+        const controlForm = document.querySelector('.device-control-form');
+        controlForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get device ID and command
+            const deviceId = this.dataset.deviceId;
+            const command = document.getElementById('command').value;
+            
+            // Collect parameters based on command type
+            const params = {};
+            if (command === 'power') {
+                params.state = document.getElementById('param_state').value;
+            } else if (command === 'set_brightness') {
+                params.brightness = document.getElementById('param_brightness').value;
+            } else if (command === 'set_temperature') {
+                params.temperature = document.getElementById('param_temperature').value;
+            } else if (command === 'set_color') {
+                params.color = document.getElementById('param_color').value;
+            } else if (command === 'set_mode') {
+                params.mode = document.getElementById('param_mode').value;
+            }
+            
+            // Send command to API
+            fetch(`/device/api/devices/${deviceId}/control`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    command: command,
+                    params: params
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show success message
+                const alertClass = data.error ? 'alert-danger' : 'alert-success';
+                const message = data.error || data.message;
+                
+                const alertElement = document.createElement('div');
+                alertElement.classList.add('alert', alertClass, 'mt-3');
+                alertElement.textContent = message;
+                
+                // Add dismiss button
+                const dismissButton = document.createElement('button');
+                dismissButton.type = 'button';
+                dismissButton.classList.add('btn-close');
+                dismissButton.dataset.bsDismiss = 'alert';
+                dismissButton.setAttribute('aria-label', 'Close');
+                alertElement.appendChild(dismissButton);
+                
+                // Add to page
+                this.insertAdjacentElement('afterend', alertElement);
+                
+                // Add to command history
+                addCommandToHistory(command, params, data.error ? 'Failed' : 'Success');
+                
+                // Auto-remove alert after 5 seconds
+                setTimeout(() => {
+                    alertElement.remove();
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Error sending command:', error);
+                
+                // Show error message
+                const alertElement = document.createElement('div');
+                alertElement.classList.add('alert', 'alert-danger', 'mt-3');
+                alertElement.textContent = 'An error occurred while sending the command.';
+                
+                // Add dismiss button
+                const dismissButton = document.createElement('button');
+                dismissButton.type = 'button';
+                dismissButton.classList.add('btn-close');
+                dismissButton.dataset.bsDismiss = 'alert';
+                dismissButton.setAttribute('aria-label', 'Close');
+                alertElement.appendChild(dismissButton);
+                
+                // Add to page
+                this.insertAdjacentElement('afterend', alertElement);
+                
+                // Add to command history
+                addCommandToHistory(command, params, 'Error');
+                
+                // Auto-remove alert after 5 seconds
+                setTimeout(() => {
+                    alertElement.remove();
+                }, 5000);
+            });
+        });
+        
+        // Add command to history table
+        function addCommandToHistory(command, params, status) {
+            const historyTable = document.getElementById('command-history');
+            const tbody = historyTable.querySelector('tbody');
+            
+            // Clear "no history" message if it exists
+            if (tbody.querySelector('td[colspan="4"]')) {
+                tbody.innerHTML = '';
+            }
+            
+            // Create new row
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date().toLocaleTimeString()}</td>
+                <td>${command}</td>
+                <td>${JSON.stringify(params)}</td>
+                <td><span class="badge ${status === 'Success' ? 'bg-success' : 'bg-danger'}">${status}</span></td>
+            `;
+            
+            // Add to top of table
+            tbody.insertBefore(row, tbody.firstChild);
+            
+            // Limit to 10 entries
+            if (tbody.children.length > 10) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+        
+        // Initialize socket.io for real-time updates
+        if (typeof io !== 'undefined') {
+            const socket = io();
+            
+            socket.on('connect', function() {
+                console.log('WebSocket connected for device control');
+            });
+            
+            // Handle device status updates
+            socket.on('device_status', function(data) {
+                console.log('Device status update:', data);
+                if (data.device_id === controlForm.dataset.deviceId) {
+                    updateDeviceStatus(data.device_id, data.data);
+                }
+            });
+            
+            // Handle command responses
+            socket.on('device_response', function(data) {
+                console.log('Device response:', data);
+                if (data.device_id === controlForm.dataset.deviceId) {
+                    handleDeviceResponse(data.device_id, data.data);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

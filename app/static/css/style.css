@@ -1,0 +1,225 @@
+/* Main styles for IoT Device Controller */
+
+/* Variable definitions */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --body-bg: #f8f9fa;
+    --card-bg: #ffffff;
+}
+
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--body-bg);
+    color: var(--dark-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Hero section */
+.hero-section {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #0d6efd 0%, #0099ff 100%);
+    color: white;
+}
+
+/* Dashboard styles */
+.dashboard-stats {
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card {
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    height: 100%;
+}
+
+.stat-card .stat-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-card .stat-title {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+}
+
+/* Device cards */
+.device-card {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+}
+
+.device-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.device-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.device-status.online {
+    background-color: var(--success-color);
+}
+
+.device-status.offline {
+    background-color: var(--secondary-color);
+}
+
+.device-status.error {
+    background-color: var(--danger-color);
+}
+
+.device-card .card-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.device-card .device-type {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.device-card .device-controls {
+    padding: 10px;
+    border-top: 1px solid #eee;
+}
+
+/* Sensor readings */
+.sensor-reading {
+    margin-bottom: 15px;
+}
+
+.sensor-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.sensor-unit {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.sensor-chart {
+    height: 300px;
+    margin-bottom: 30px;
+}
+
+/* Auth pages */
+.auth-card {
+    max-width: 500px;
+    margin: 50px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+    min-height: calc(100vh - 56px - 72px); /* Viewport height minus header and footer heights */
+    background-color: var(--light-color);
+    border-right: 1px solid #e0e0e0;
+    padding-top: 20px;
+}
+
+.sidebar-nav .nav-link {
+    color: var(--dark-color);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.sidebar-nav .nav-link i {
+    margin-right: 10px;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+    .dashboard-sidebar {
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+}
+
+/* Utility classes */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0099ff 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #6610f2 100%);
+}
+
+/* Animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+} 
